@@ -160,6 +160,23 @@ fn show_station(stations: &mut HashMap<String, Station>) -> std::io::Result<()> 
     Ok(())
 }
 
+fn next_station(links: &mut HashMap<usize, Link>) -> std::io::Result<()> {
+    println!("Enter link: ");
+    let link: usize = read_line()?.parse().unwrap();
+    println!("Enter station: ");
+    let current_station = read_line()?;
+
+    let stations = &links.get(&link).unwrap().stations;
+    let index = stations.iter()
+        .position(|station| station.eq(&current_station)).unwrap();
+    match stations.get(index + 1) {
+        Some(station) => println!("Next station is: {}", station),
+        _ => println!("There is no next station for Link {}!", link),
+    }
+
+    Ok(())
+}
+
 fn main() -> std::io::Result<()> {
     let mut data = load_data();
 
@@ -172,6 +189,8 @@ fn main() -> std::io::Result<()> {
             Some('2') => add_station(&mut data.stations)?,
             Some('3') => show_link(&mut data.links)?,
             Some('4') => show_station(&mut data.stations)?,
+            Some('5') => (),
+            Some('6') => next_station(&mut data.links)?,
             Some('8') => save_data(&mut data),
             Some('9') => delete_db(&mut data),
             _ => ()
