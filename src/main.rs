@@ -160,11 +160,35 @@ fn show_station(stations: &mut HashMap<String, Station>) -> std::io::Result<()> 
     Ok(())
 }
 
+fn is_station_on_link(links: &mut HashMap<usize, Link>, link: usize, current_station: &String) -> bool {
+    let stations = &links.get(&link).unwrap().stations;
+
+    stations.iter().any(|station| station.eq(current_station))
+}
+
+fn test_is_station_on_link(links: &mut HashMap<usize, Link>) -> std::io::Result<()> {
+    println!("Enter link: ");
+    let link: usize = read_line()?.parse().unwrap();
+    println!("Enter station: ");
+    let current_station = read_line()?;
+
+    match is_station_on_link(links, link, &current_station) {
+        true => println!("YES! Station '{}' is on Link {}.", current_station, link),
+        false => println!("NO! Station '{}' is not on Link {}.", current_station, link),
+    }
+    Ok(())
+}
+
 fn next_station(links: &mut HashMap<usize, Link>) -> std::io::Result<()> {
     println!("Enter link: ");
     let link: usize = read_line()?.parse().unwrap();
     println!("Enter station: ");
     let current_station = read_line()?;
+
+    if !is_station_on_link(links, link, &current_station) {
+        println!("Station '{}' is not on Link {}.", current_station, link);
+        return Ok(());
+    }
 
     let stations = &links.get(&link).unwrap().stations;
     let index = stations.iter()
@@ -189,7 +213,7 @@ fn main() -> std::io::Result<()> {
             Some('2') => add_station(&mut data.stations)?,
             Some('3') => show_link(&mut data.links)?,
             Some('4') => show_station(&mut data.stations)?,
-            Some('5') => (),
+            Some('5') => test_is_station_on_link(&mut data.links)?,
             Some('6') => next_station(&mut data.links)?,
             Some('8') => save_data(&mut data),
             Some('9') => delete_db(&mut data),
