@@ -69,6 +69,7 @@ fn delete_db(data: &mut Data) {
 }
 
 fn print_help() {
+    println!("\n");
     println!("Usage:");
     println!("0 - Shutdown");
     println!("1 - Add link");
@@ -77,6 +78,7 @@ fn print_help() {
     println!("4 - Show station");
     println!("8 - Save DB");
     println!("9 - Delete DB");
+    println!();
 }
 
 fn read_line() -> std::io::Result<String> {
@@ -161,14 +163,10 @@ fn show_station(stations: &mut HashMap<String, Station>) -> std::io::Result<()> 
 fn main() -> std::io::Result<()> {
     let mut data = load_data();
 
-    let mut input = String::new();
-    while input != "0\n" {
+    loop {
         print_help();
-        input = String::new();
-        stdin().read_line(&mut input)?;
 
-        println!("\n");
-        match input.chars().next() {
+        match read_line()?.chars().next() {
             Some('0') => exit(0),
             Some('1') => add_link(&mut data.links)?,
             Some('2') => add_station(&mut data.stations)?,
@@ -178,8 +176,5 @@ fn main() -> std::io::Result<()> {
             Some('9') => delete_db(&mut data),
             _ => ()
         }
-        println!("\n");
     }
-
-    Ok(())
 }
