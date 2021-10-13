@@ -61,6 +61,13 @@ fn load_data() -> Data {
     data
 }
 
+fn delete_db(data: &mut Data) {
+    *data = Data {
+        links: HashMap::new(),
+        stations: HashMap::new(),
+    }
+}
+
 fn print_help() {
     println!("Usage:");
     println!("0 - Shutdown");
@@ -68,23 +75,26 @@ fn print_help() {
     println!("2 - Add station");
     println!("3 - Show link");
     println!("4 - Show station");
+    println!("9 - Delete DB");
+}
+
+fn read_line() -> std::io::Result<String> {
+    let mut input = String::new();
+    stdin().read_line(&mut input)?;
+
+    Ok(String::from(input.trim()))
 }
 
 fn add_link(links: &mut HashMap<usize, Link>) -> std::io::Result<()> {
     println!("Adding new link!");
 
     println!("Number of new link: ");
-    let mut input = String::new();
-    stdin().read_line(&mut input)?;
-    let number: usize = input.trim().parse().unwrap();
+    let number: usize = read_line()?.parse().unwrap();
 
     println!("Stations in format ['' '' '' ...]: ");
-    let mut input = String::new();
-    stdin().read_line(&mut input)?;
-
-    let stations: Vec<String> = input.trim().split(' ')
+    let stations: Vec<String> = read_line()?.split(' ')
         .map(|station| station.to_string()).collect();
-    println!("{:?}", stations);
+    
     let link = Link {
         number: number,
         stations: stations,
@@ -96,9 +106,7 @@ fn add_link(links: &mut HashMap<usize, Link>) -> std::io::Result<()> {
 fn show_link(links: &mut HashMap<usize, Link>) -> std::io::Result<()> {
     println!("Links: {:?}", links);
     println!("Enter link number to show: ");
-    let mut input = String::new();
-    stdin().read_line(&mut input)?;
-    let number: usize = input.trim().parse().unwrap();
+    let number: usize = read_line()?.parse().unwrap();
     match links.get(&number) {
         Some(link) => println!("Link {} stations: {:?}", number, (*link).stations),
         None => println!("There is no link with number '{}'!", number),
@@ -111,15 +119,11 @@ fn add_station(stations: &mut HashMap<String, Station>) -> std::io::Result<()> {
     println!("Adding new station!");
 
     println!("Name of the new station: ");
-    let mut input = String::new();
-    stdin().read_line(&mut input)?;
-    let name: String = String::from(input.trim());
+    let name: String = read_line()?;
 
-    println!("Harmonogram in format [08:30 hn,12:10 konecna,...]: ");
-    let mut input = String::new();
-    stdin().read_line(&mut input)?;
+    println!("Harmonogram in format [08:30 1,12:10 12,...]: ");
     let mut harmonogram: BTreeMap<String, usize> = BTreeMap::new();
-    let entries: Vec<(String, usize)> = input.trim().split(',')
+    let entries: Vec<(String, usize)> = read_line()?.split(',')
         .map(|entry| {
             let a: Vec<String> = entry.trim().split(' ')
                 .map(|s| String::from(s)).collect();
@@ -130,9 +134,7 @@ fn add_station(stations: &mut HashMap<String, Station>) -> std::io::Result<()> {
     }
 
     println!("Is there a link to Main Station?");
-    let mut input = String::new();
-    stdin().read_line(&mut input)?;
-    let to_main_station = input.trim().eq("yes");
+    let to_main_station = read_line()?.eq("yes");
 
     let station = Station {
         name: name.clone(),
@@ -144,10 +146,9 @@ fn add_station(stations: &mut HashMap<String, Station>) -> std::io::Result<()> {
 }
 
 fn show_station(stations: &mut HashMap<String, Station>) -> std::io::Result<()> {
+    println!("{:?}", stations);
     println!("Enter station name to show: ");
-    let mut input = String::new();
-    stdin().read_line(&mut input)?;
-    let name = input.trim();
+    let name = &read_line()?;
     match stations.get(name) {
         Some(station) => println!("{:?}", station),
         None => println!("There is no station with name '{}'!", name),
@@ -172,6 +173,7 @@ fn main() -> std::io::Result<()> {
             Some('2') => add_station(&mut data.stations)?,
             Some('3') => show_link(&mut data.links)?,
             Some('4') => show_station(&mut data.stations)?,
+            Some('9') => delete_db(&mut data),
             _ => ()
         }
         save_data(&data);
