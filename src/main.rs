@@ -75,6 +75,7 @@ fn print_help() {
     println!("2 - Add station");
     println!("3 - Show link");
     println!("4 - Show station");
+    println!("8 - Save DB");
     println!("9 - Delete DB");
 }
 
@@ -173,10 +174,10 @@ fn main() -> std::io::Result<()> {
             Some('2') => add_station(&mut data.stations)?,
             Some('3') => show_link(&mut data.links)?,
             Some('4') => show_station(&mut data.stations)?,
+            Some('8') => save_data(&mut data),
             Some('9') => delete_db(&mut data),
             _ => ()
         }
-        save_data(&data);
         println!("\n");
     }
 
