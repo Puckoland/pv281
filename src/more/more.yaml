@@ -1,0 +1,16 @@
+name: main
+version: "1.0"
+author: Kevin K. <kbknapp@gmail.com>
+about: Does awesome things
+args:
+    - file:
+        short: f
+        long: file
+        value_name: FILE
+        about: Sets a custom file to read
+        takes_value: true
+    - lines:
+        short: l
+        long: lines
+        value_name: LINES
+        about: Sets the number of lines to read
