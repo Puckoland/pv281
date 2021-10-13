@@ -76,6 +76,9 @@ fn print_help() {
     println!("2 - Add station");
     println!("3 - Show link");
     println!("4 - Show station");
+    println!("5 - Is station on link");
+    println!("6 - Waht is the next station on link");
+    println!("7 - Are 2 link connected");
     println!("8 - Save DB");
     println!("9 - Delete DB");
     println!();
@@ -201,6 +204,23 @@ fn next_station(links: &mut HashMap<usize, Link>) -> std::io::Result<()> {
     Ok(())
 }
 
+fn are_connected(links: &mut HashMap<usize, Link>) -> std::io::Result<()> {
+    println!("Enter first link: ");
+    let link: usize = read_line()?.parse().unwrap();
+    println!("Enter second link: ");
+    let link2: usize = read_line()?.parse().unwrap();
+
+    let stations = &links.get(&link).unwrap().stations;
+    let stations2 = &links.get(&link2).unwrap().stations;
+
+    match stations.iter().any(|st1| stations2.contains(st1)) {
+        true => println!("Station '{}' is connected to station '{}'", link, link2),
+        false => println!("Station '{}' is not connected to station '{}'", link, link2),
+    }
+
+    Ok(())
+}
+
 fn main() -> std::io::Result<()> {
     let mut data = load_data();
 
@@ -215,6 +235,7 @@ fn main() -> std::io::Result<()> {
             Some('4') => show_station(&mut data.stations)?,
             Some('5') => test_is_station_on_link(&mut data.links)?,
             Some('6') => next_station(&mut data.links)?,
+            Some('7') => are_connected(&mut data.links)?,
             Some('8') => save_data(&mut data),
             Some('9') => delete_db(&mut data),
             _ => ()
