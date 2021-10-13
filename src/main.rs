@@ -41,8 +41,9 @@ struct Data {
     stations: HashMap<String, Station>,
 }
 
-fn save_data(data:&Data) {
+fn save_data(data: &Data) {
     save_file("save.bin", 0, data).unwrap();
+    println!("Data saved.")
 }
 
 fn load_data() -> Data {
@@ -62,6 +63,8 @@ fn load_data() -> Data {
 }
 
 fn delete_db(data: &mut Data) {
+    println!("Data deleted.");
+
     *data = Data {
         links: HashMap::new(),
         stations: HashMap::new(),
@@ -79,8 +82,9 @@ fn print_help() {
     println!("5 - Is station on link");
     println!("6 - Waht is the next station on link");
     println!("7 - Are 2 link connected");
-    println!("8 - Save DB");
-    println!("9 - Delete DB");
+    println!("8 - Stations on Link connected to main station");
+    println!("+ - Save DB");
+    println!("- - Delete DB");
     println!();
 }
 
@@ -109,7 +113,7 @@ fn add_link(links: &mut HashMap<usize, Link>) -> std::io::Result<()> {
     Ok(())
 }
 
-fn show_link(links: &mut HashMap<usize, Link>) -> std::io::Result<()> {
+fn show_link(links: &HashMap<usize, Link>) -> std::io::Result<()> {
     println!("Links: {:?}", links);
     println!("Enter link number to show: ");
     let number: usize = read_line()?.parse().unwrap();
@@ -151,7 +155,7 @@ fn add_station(stations: &mut HashMap<String, Station>) -> std::io::Result<()> {
     Ok(())
 }
 
-fn show_station(stations: &mut HashMap<String, Station>) -> std::io::Result<()> {
+fn show_station(stations: &HashMap<String, Station>) -> std::io::Result<()> {
     println!("{:?}", stations);
     println!("Enter station name to show: ");
     let name = &read_line()?;
@@ -163,13 +167,13 @@ fn show_station(stations: &mut HashMap<String, Station>) -> std::io::Result<()> 
     Ok(())
 }
 
-fn is_station_on_link(links: &mut HashMap<usize, Link>, link: usize, current_station: &String) -> bool {
+fn is_station_on_link(links: &HashMap<usize, Link>, link: usize, current_station: &String) -> bool {
     let stations = &links.get(&link).unwrap().stations;
 
     stations.iter().any(|station| station.eq(current_station))
 }
 
-fn test_is_station_on_link(links: &mut HashMap<usize, Link>) -> std::io::Result<()> {
+fn test_is_station_on_link(links: &HashMap<usize, Link>) -> std::io::Result<()> {
     println!("Enter link: ");
     let link: usize = read_line()?.parse().unwrap();
     println!("Enter station: ");
@@ -182,7 +186,7 @@ fn test_is_station_on_link(links: &mut HashMap<usize, Link>) -> std::io::Result<
     Ok(())
 }
 
-fn next_station(links: &mut HashMap<usize, Link>) -> std::io::Result<()> {
+fn next_station(links: &HashMap<usize, Link>) -> std::io::Result<()> {
     println!("Enter link: ");
     let link: usize = read_line()?.parse().unwrap();
     println!("Enter station: ");
@@ -204,7 +208,7 @@ fn next_station(links: &mut HashMap<usize, Link>) -> std::io::Result<()> {
     Ok(())
 }
 
-fn are_connected(links: &mut HashMap<usize, Link>) -> std::io::Result<()> {
+fn are_connected(links: &HashMap<usize, Link>) -> std::io::Result<()> {
     println!("Enter first link: ");
     let link: usize = read_line()?.parse().unwrap();
     println!("Enter second link: ");
@@ -221,6 +225,20 @@ fn are_connected(links: &mut HashMap<usize, Link>) -> std::io::Result<()> {
     Ok(())
 }
 
+fn stations_to_main_station(data: &Data) -> std::io::Result<()> {
+    println!("Enter link: ");
+    let link: usize = read_line()?.parse().unwrap();
+    let link_stations = &data.links.get(&link).unwrap().stations;
+    let stations: Vec<&String> = data.stations.iter()
+        .map(|(_, station)| station)
+        .filter(|station| station.to_main_station && link_stations.contains(&station.name))
+        .map(|station| &station.name).collect();
+
+    println!("Stations on Link {} that have connection to main station: {:?}", link, stations);
+
+    Ok(())
+}
+
 fn main() -> std::io::Result<()> {
     let mut data = load_data();
 
@@ -231,13 +249,14 @@ fn main() -> std::io::Result<()> {
             Some('0') => exit(0),
             Some('1') => add_link(&mut data.links)?,
             Some('2') => add_station(&mut data.stations)?,
-            Some('3') => show_link(&mut data.links)?,
-            Some('4') => show_station(&mut data.stations)?,
-            Some('5') => test_is_station_on_link(&mut data.links)?,
-            Some('6') => next_station(&mut data.links)?,
-            Some('7') => are_connected(&mut data.links)?,
-            Some('8') => save_data(&mut data),
-            Some('9') => delete_db(&mut data),
+            Some('3') => show_link(&data.links)?,
+            Some('4') => show_station(&data.stations)?,
+            Some('5') => test_is_station_on_link(&data.links)?,
+            Some('6') => next_station(&data.links)?,
+            Some('7') => are_connected(&data.links)?,
+            Some('8') => stations_to_main_station(&data)?,
+            Some('+') => save_data(&data),
+            Some('-') => delete_db(&mut data),
             _ => ()
         }
     }
