@@ -217,9 +217,12 @@ fn are_connected(links: &HashMap<usize, Link>) -> std::io::Result<()> {
     let stations = &links.get(&link).unwrap().stations;
     let stations2 = &links.get(&link2).unwrap().stations;
 
-    match stations.iter().any(|st1| stations2.contains(st1)) {
-        true => println!("Station '{}' is connected to station '{}'", link, link2),
-        false => println!("Station '{}' is not connected to station '{}'", link, link2),
+    let common: Vec<&String> = stations.iter().filter(|st1| stations2.contains(st1)).collect();
+
+    print!("Link {} and Link {} are ", link, link2);
+    match !common.is_empty() {
+        true => println!("connected at stations: {:?}.", common),
+        false => println!("not connected!"),
     }
 
     Ok(())
