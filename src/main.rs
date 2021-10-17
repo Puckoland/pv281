@@ -42,8 +42,10 @@ struct Data {
 }
 
 fn save_data(data: &Data) {
-    save_file("save.bin", 0, data).unwrap();
-    println!("Data saved.")
+    match save_file("save.bin", 0, data) {
+        Ok(_) => println!("Data saved."),
+        Err(err) => println!("{}", err),
+    }
 }
 
 fn load_data() -> Data {
@@ -80,7 +82,7 @@ fn print_help() {
     println!("3 - Show link");
     println!("4 - Show station");
     println!("5 - Is station on link");
-    println!("6 - Waht is the next station on link");
+    println!("6 - What is the next station on link");
     println!("7 - Are 2 link connected");
     println!("8 - Stations on Link connected to main station");
     println!("+ - Save DB");
@@ -99,8 +101,10 @@ fn add_link(links: &mut HashMap<usize, Link>) -> std::io::Result<()> {
     println!("Adding new link!");
 
     println!("Number of new link: ");
-    let number: usize = read_line()?.parse().unwrap();
-
+    let number = match read_line()?.parse() {
+        Ok(num) => num,
+        _ => panic!("Expected number!"),
+    };
     println!("Stations in format ['' '' '' ...]: ");
     let stations: Vec<String> = read_line()?.split(' ')
         .map(|station| station.to_string()).collect();
@@ -116,7 +120,10 @@ fn add_link(links: &mut HashMap<usize, Link>) -> std::io::Result<()> {
 fn show_link(links: &HashMap<usize, Link>) -> std::io::Result<()> {
     println!("Links: {:?}", links);
     println!("Enter link number to show: ");
-    let number: usize = read_line()?.parse().unwrap();
+    let number = match read_line()?.parse() {
+        Ok(num) => num,
+        _ => panic!("Expected number!"),
+    };
     match links.get(&number) {
         Some(link) => println!("Link {} stations: {:?}", number, (*link).stations),
         None => println!("There is no link with number '{}'!", number),
@@ -137,7 +144,13 @@ fn add_station(stations: &mut HashMap<String, Station>) -> std::io::Result<()> {
         .map(|entry| {
             let a: Vec<String> = entry.trim().split(' ')
                 .map(|s| String::from(s)).collect();
-            (a[0].clone(), a[1].parse().unwrap())
+            (
+                a[0].clone(), 
+                match a[1].parse() {
+                    Ok(num) => num,
+                    Err(err) => panic!("{}", err),
+                }
+            )
         }).collect();
     for (key, value) in entries {
         harmonogram.insert(key, value);
@@ -168,14 +181,20 @@ fn show_station(stations: &HashMap<String, Station>) -> std::io::Result<()> {
 }
 
 fn is_station_on_link(links: &HashMap<usize, Link>, link: usize, current_station: &String) -> bool {
-    let stations = &links.get(&link).unwrap().stations;
+    let stations = match &links.get(&link) {
+        Some(link) => &link.stations,
+        None => panic!("There are no stations on Link '{}'!", link),
+    };
 
     stations.iter().any(|station| station.eq(current_station))
 }
 
 fn test_is_station_on_link(links: &HashMap<usize, Link>) -> std::io::Result<()> {
     println!("Enter link: ");
-    let link: usize = read_line()?.parse().unwrap();
+    let link = match read_line()?.parse() {
+        Ok(num) => num,
+        _ => panic!("Expected number!"),
+    };
     println!("Enter station: ");
     let current_station = read_line()?;
 
@@ -188,21 +207,35 @@ fn test_is_station_on_link(links: &HashMap<usize, Link>) -> std::io::Result<()> 
 
 fn next_station(links: &HashMap<usize, Link>) -> std::io::Result<()> {
     println!("Enter link: ");
-    let link: usize = read_line()?.parse().unwrap();
+    let link = match read_line()?.parse() {
+        Ok(num) => num,
+        _ => panic!("Expected number!"),
+    };
     println!("Enter station: ");
     let current_station = read_line()?;
 
-    if !is_station_on_link(links, link, &current_station) {
-        println!("Station '{}' is not on Link {}.", current_station, link);
-        return Ok(());
-    }
+    let stations = match &links.get(&link) {
+        Some(link) => &link.stations,
+        None => panic!("There are no stations on Link '{}'!", link),
+    };
 
-    let stations = &links.get(&link).unwrap().stations;
-    let index = stations.iter()
-        .position(|station| station.eq(&current_station)).unwrap();
-    match stations.get(index + 1) {
-        Some(station) => println!("Next station is: {}", station),
-        _ => println!("There is no next station for Link {}!", link),
+    let mut iter = stations.iter();
+    loop {
+        match iter.next() {
+            Some(val) => {
+                if val.eq(&current_station) {
+                    match iter.next() {
+                        Some(station) => println!("Next station is: '{}'", station),
+                        None => println!("There is no next station on Link {}!", link),
+                    }
+                    break;
+                }
+            },
+            None => {
+                println!("Station '{}' is not on Link {}.", current_station, link);
+                break;
+            },
+        }
     }
 
     Ok(())
@@ -210,12 +243,24 @@ fn next_station(links: &HashMap<usize, Link>) -> std::io::Result<()> {
 
 fn are_connected(links: &HashMap<usize, Link>) -> std::io::Result<()> {
     println!("Enter first link: ");
-    let link: usize = read_line()?.parse().unwrap();
+    let link = match read_line()?.parse() {
+        Ok(num) => num,
+        _ => panic!("Expected number!"),
+    };
     println!("Enter second link: ");
-    let link2: usize = read_line()?.parse().unwrap();
+    let link2 = match read_line()?.parse() {
+        Ok(num) => num,
+        _ => panic!("Expected number!"),
+    };
 
-    let stations = &links.get(&link).unwrap().stations;
-    let stations2 = &links.get(&link2).unwrap().stations;
+    let stations = match &links.get(&link) {
+        Some(link) => &link.stations,
+        None => panic!("There are no stations on Link '{}'!", link),
+    };
+    let stations2 = match &links.get(&link2) {
+        Some(link) => &link.stations,
+        None => panic!("There are no stations on Link '{}'!", link2),
+    };
 
     let common: Vec<&String> = stations.iter().filter(|st1| stations2.contains(st1)).collect();
 
@@ -230,8 +275,14 @@ fn are_connected(links: &HashMap<usize, Link>) -> std::io::Result<()> {
 
 fn stations_to_main_station(data: &Data) -> std::io::Result<()> {
     println!("Enter link: ");
-    let link: usize = read_line()?.parse().unwrap();
-    let link_stations = &data.links.get(&link).unwrap().stations;
+    let link = match read_line()?.parse() {
+        Ok(num) => num,
+        _ => panic!("Expected number!"),
+    };
+    let link_stations = match &data.links.get(&link) {
+        Some(link) => &link.stations,
+        None => panic!("There are no stations on Link '{}'!", link),
+    };
     let stations: Vec<&String> = data.stations.iter()
         .map(|(_, station)| station)
         .filter(|station| station.to_main_station && link_stations.contains(&station.name))
