@@ -1,5 +1,6 @@
 use diesel::Queryable;
 use crate::schema::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Insertable)]
 #[table_name="address"]
@@ -10,7 +11,7 @@ pub struct NewAddress<'a> {
     pub zip: &'a str
 }
 
-#[derive(Queryable, Debug)]
+#[derive(Serialize, Deserialize, Queryable, Debug)]
 pub struct Address {
     pub id: i32,
     pub city: String,
@@ -27,7 +28,7 @@ pub struct NewUser<'a> {
     pub address_id: i32
 }
 
-#[derive(Queryable, Debug)]
+#[derive(Serialize, Deserialize, Queryable, Debug)]
 pub struct User {
     pub id: i32,
     pub first_name: String,
@@ -42,7 +43,7 @@ pub struct NewCategorization {
     pub category_id: i32,
 }
 
-#[derive(Queryable, Debug)]
+#[derive(Serialize, Deserialize, Queryable, Debug)]
 pub struct Categorization {
     pub id: i32,
     pub product_id: i32,
@@ -56,7 +57,7 @@ pub struct NewProduct<'a> {
     pub price: i32,
 }
 
-#[derive(Queryable, Debug)]
+#[derive(Serialize, Deserialize, Queryable, Debug)]
 pub struct Product {
     pub id: i32,
     pub name: String,
@@ -70,7 +71,7 @@ pub struct NewCategory<'a> {
     pub parent_id: Option<i32>
 }
 
-#[derive(Queryable, Debug)]
+#[derive(Serialize, Deserialize, Queryable, Debug)]
 pub struct Category {
     pub id: i32,
     pub name: String,
@@ -91,7 +92,7 @@ pub struct NewOrder {
     pub state_id: i32,
 }
 
-#[derive(Queryable, Debug)]
+#[derive(Serialize, Deserialize, Queryable, Debug)]
 pub struct Order {
     pub id: i32,
     pub first_name: String,
@@ -105,7 +106,7 @@ pub struct Order {
     pub state_id: i32,
 }
 
-#[derive(Queryable, Debug)]
+#[derive(Serialize, Deserialize, Queryable, Debug)]
 pub struct MyState {
     pub id: i32,
     pub my_state: String,

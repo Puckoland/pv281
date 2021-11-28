@@ -52,9 +52,11 @@ async fn categories(conn_pool: Arc<PgPool>) {
 async fn products(conn_pool: Arc<PgPool>) {
     let product_repo = PostgresProductRepo::new(conn_pool);
     let products = [
-        product_repo.create_product("iPhone", 1000, vec![1, 3]),
-        product_repo.create_product("iPad", 1300, vec![3]),
-        product_repo.create_product("Samsung", 900, Vec::new())
+        product_repo.create_product("iPhone", 1000, vec![1, 2]),
+        product_repo.create_product("iPad", 1300, vec![2]),
+        product_repo.create_product("Samsung", 900, vec![1]),
+        product_repo.create_product("Not anywhere", 0, Vec::new()),
+        product_repo.create_product("Random shit", 10, vec![3]),
     ];
     let products = try_join_all(products).await.unwrap();
     println!("{:?}", products);

@@ -1,0 +1,18 @@
+<h2 class="m-6 text-xl font-bold text-indigo-900">Categories</h2>
+<ul class="m-auto mt-6 w-max text-left">
+    <!-- {{ selected_category }} -->
+    {% for category in categories %}
+    <li>
+        <button class="font-bold" onclick="set_category('{{category.id}}')">
+            {{ category.name }}
+        </button>
+    </li>
+    {% endfor %}
+</ul>
+
+<script>
+function set_category(category_id) {
+    console.log(category_id);
+    window.location.href = "/categories/" + category_id + "/products";
+}
+</script>

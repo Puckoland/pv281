@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
-mod address_repo;
-mod product_repo;
-mod user_repo;
+#[path ="address_repo.rs"] mod address_repo;
+#[path ="product_repo.rs"] mod product_repo;
+#[path ="user_repo.rs"] mod user_repo;
 
 use bodovana::{PgPool, models::{MyState, NewOrder, Order}, schema};
 use user_repo::*;

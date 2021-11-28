@@ -10,6 +10,7 @@ use async_trait::async_trait;
 pub trait CategoryRepo {
     async fn create_category(&self, name: &str, parent_id: Option<i32>) -> Result<i32>;
     async fn get_category(&self, category_id: i32) -> Result<Category>;
+    async fn list_categories(&self) -> Result<Vec<Category>>;
 }
 
 pub struct PostgerCategoryRepo {
@@ -50,6 +51,16 @@ impl CategoryRepo for PostgerCategoryRepo {
                 .filter(id.eq(category_id))
                 .first(&self.pg_pool.get()?)
                 .expect("Error loading user")
+        )
+    }
+
+    async fn list_categories(&self) -> Result<Vec<Category>> {
+        use self::schema::categories::dsl::*;
+
+        Ok(
+            categories
+                .load(&self.pg_pool.get()?)
+                .expect("Error loading categories")
         )
     }
 }

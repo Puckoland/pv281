@@ -11,6 +11,8 @@ pub trait ProductRepo {
     async fn create_product(&self, name: &str, price: i32, category_ids: Vec<i32>) -> Result<i32>;
     async fn get_product(&self, product_id: i32) -> Result<Product>;
     async fn update_price(&self, product_id:i32, price: i32) -> Result<Product>;
+    async fn list_products(&self) -> Result<Vec<Product>>;
+    async fn list_products_by_category(&self, category_id: i32) -> Result<Vec<Product>>;
 }
 
 pub struct PostgresProductRepo {
@@ -73,5 +75,28 @@ impl ProductRepo for PostgresProductRepo {
             .expect("Error updating product");
 
         Ok(product)
+    }
+
+    async fn list_products(&self) -> Result<Vec<Product>> {
+        use self::schema::products::dsl::*;
+
+        Ok(
+            products
+                .load(&self.pg_pool.get()?)
+                .expect("Error loading products")
+        )
+    }
+
+    async fn list_products_by_category(&self, category_id: i32) -> Result<Vec<Product>> {
+        use self::schema::categorizations;
+        use self::schema::products;
+
+        let res: Vec<(Categorization, Product)> = categorizations::table
+                .filter(categorizations::category_id.eq(category_id))
+                .inner_join(products::table)
+                .load(&self.pg_pool.get()?)
+                .expect("Error getting products");
+        
+        Ok(res.into_iter().map(|data: (Categorization, Product)| data.1).collect())
     }
 }

@@ -1,0 +1,10 @@
+<h2 class="m-6 text-xl font-bold text-indigo-900">Products</h2>
+<ul class="m-auto mt-6 w-max text-left">
+    {% for product in products %}
+    <li>
+        <span class="font-bold">
+            {{ product.name }}
+        </span> : {{ product.price }}
+    </li>
+    {% endfor %}
+</ul>
