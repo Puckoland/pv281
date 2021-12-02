@@ -1,5 +1,10 @@
 use serde::{Deserialize, Serialize};
 
+extern crate savefile;
+use savefile::prelude::*;
+#[macro_use]
+extern crate savefile_derive;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub enum CommandType {
     Get,
@@ -31,7 +36,7 @@ impl Command {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Savefile)]
 pub struct Receipt {
     pub value: i32,
     pub description: Option<String>,
@@ -44,5 +49,21 @@ impl Receipt {
             None => None,
         };
         Self { value, description }
+    }
+
+    pub fn save(&self, key: &usize) {
+        match save_file(&format!("{}.bin", key), 0, self) {
+            Ok(_) => println!("Data saved."),
+            Err(err) => println!("{}", err),
+        }
+    }
+    
+    pub fn load(key: &usize) -> Option<Receipt> {
+        let data = match load_file(&format!("{}.bin", key), 0) {
+            Ok(data) => Some(data),
+            _ => None,
+        };
+    
+        data
     }
 }

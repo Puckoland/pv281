@@ -1,30 +1,25 @@
-use std::{collections::HashMap, sync::Arc};
 use tokio::{
     io::{self, AsyncReadExt},
     net::{TcpListener, TcpStream},
-    sync::RwLock,
 };
 
 mod dictionary;
 use dictionary::{get_from_dict, insert_to_dict};
 
-use command::{Command, CommandType, Receipt};
+use command::{Command, CommandType};
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
     let listener = TcpListener::bind("127.0.0.1:8000").await?;
-    let dictionary: Arc<RwLock<HashMap<usize, Receipt>>> = Arc::new(RwLock::new(HashMap::new()));
 
     loop {
         let (mut socket, _) = listener.accept().await?;
-        let dict_clone = dictionary.clone();
-        process_socket(&mut socket, dict_clone).await?;
+        process_socket(&mut socket).await?;
     }
 }
 
 async fn process_socket(
     socket: &mut TcpStream,
-    dictionary: Arc<RwLock<HashMap<usize, Receipt>>>,
 ) -> io::Result<()> {
     let mut buffer = vec![0; 1024];
 
@@ -47,7 +42,7 @@ async fn process_socket(
 
         // We should use match instead of unwrap
         let data = String::from_utf8(buffer[0..data_length].to_vec()).unwrap();
-        process_command(socket, data, dictionary.clone()).await?;
+        process_command(socket, data).await?;
     }
 
     Ok(())
@@ -56,17 +51,15 @@ async fn process_socket(
 async fn process_command(
     socket: &mut TcpStream,
     data_string: String,
-    dictionary: Arc<RwLock<HashMap<usize, Receipt>>>,
 ) -> io::Result<()> {
     let deserialized: Command = serde_json::from_str(&data_string).unwrap();
     println!("[server] Command received from client: {:?}", deserialized);
 
     match deserialized.cmd {
-        CommandType::Get => get_from_dict(socket, dictionary, deserialized.key).await?,
+        CommandType::Get => get_from_dict(socket, deserialized.key).await?,
         CommandType::Insert => {
             insert_to_dict(
                 socket,
-                dictionary,
                 deserialized.key,
                 deserialized.value.unwrap(),
             )
