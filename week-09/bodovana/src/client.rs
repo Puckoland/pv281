@@ -17,6 +17,14 @@ async fn main() -> anyhow::Result<()> {
     // Create a category
     let request = tonic::Request::new(category::CreateCategoryRequest {
         name: "proto".to_string(),
+        parent_id: None
+    });
+    let response = category_client.create_category(request).await?;
+    println!("Response from server: {:?}", response);
+
+    let request = tonic::Request::new(category::CreateCategoryRequest {
+        name: "proto_child".to_string(),
+        parent_id: Some(1)
     });
     let response = category_client.create_category(request).await?;
     println!("Response from server: {:?}", response);
@@ -25,6 +33,7 @@ async fn main() -> anyhow::Result<()> {
     let request = tonic::Request::new(product::CreateProductRequest {
         name: "Proto phone".to_string(),
         price: 7000,
+        categories: vec![1, 2],
     });
     let response = client.create_product(request).await?;
     println!("Response from server: {:?}", response);

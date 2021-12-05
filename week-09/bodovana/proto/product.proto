@@ -17,6 +17,7 @@ message Product {
 message CreateProductRequest {
     string name = 1;
     int32 price = 2;
+    repeated int32 categories = 3;
 }
 
 message CreateProductReply {

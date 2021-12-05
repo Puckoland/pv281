@@ -60,7 +60,7 @@ impl ProductService for MyProductService {
         let body = &request.into_inner();
         let result = self
             .data
-            .create_product(&body.name, body.price, vec![])
+            .create_product(&body.name, body.price, body.categories.clone())
             .await;
 
         let reply = match result {
@@ -90,6 +90,7 @@ impl CategoryService for MyCategoryService {
                 .map(|category| category::Category {
                     id: category.id,
                     name: category.name,
+                    parent_id: category.parent_id,
                     // start_time: Some(category.start_time.convert()),
                 })
                 .collect(),
@@ -105,7 +106,7 @@ impl CategoryService for MyCategoryService {
         println!("[Server] Request from client: {:?}", &request);
 
         let body = &request.into_inner();
-        let result = self.data.create_category(&body.name, None).await;
+        let result = self.data.create_category(&body.name, body.parent_id).await;
 
         let reply = match result {
             Ok(id) => CreateCategoryReply {

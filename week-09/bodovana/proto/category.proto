@@ -11,10 +11,12 @@ service CategoryService {
 message Category {
   int32 id = 1;
   string name = 2;
+  optional int32 parent_id = 3;
 }
 
 message CreateCategoryRequest {
   string name = 1;
+  optional int32 parent_id = 2;
 }
 
 message CreateCategoryReply {
