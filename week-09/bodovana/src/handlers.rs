@@ -20,6 +20,8 @@ pub async fn get_categories(data: web::Data<Arc<PostgerCategoryRepo>>) -> impl R
     HttpResponse::Ok().json(categories)
 }
 
+
+#[get("/categories/{cat_id}/products")]
 pub async fn get_products_by_category(path: web::Path<i32>, data: web::Data<Arc<PostgresProductRepo>>) -> actix_web::Result<HttpResponse> {
     let id = path.into_inner();
     let products = data.list_products_by_category(id).await.unwrap_or_default();
@@ -50,6 +52,7 @@ pub struct AppState {
 //     }
 // }
 
+#[get("/")]
 pub async fn index(
     data: web::Data<AppState>,
     product_data: web::Data<Arc<PostgresProductRepo>>,
