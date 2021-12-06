@@ -1,0 +1,29 @@
+syntax = "proto3";
+package product;
+
+import "google/protobuf/empty.proto";
+
+service ProductService {
+    rpc ListProducts (google.protobuf.Empty) returns (ProductsReply);
+    rpc CreateProduct (CreateProductRequest) returns (CreateProductReply);
+}
+
+message Product {
+    int32 id = 1;
+    string name = 2;
+    int32 price = 3;
+}
+
+message CreateProductRequest {
+    string name = 1;
+    int32 price = 2;
+    repeated int32 categories = 3;
+}
+
+message CreateProductReply {
+    string message = 1;
+}
+
+message ProductsReply {
+    repeated Product products = 1;
+}
